@@ -9,6 +9,7 @@ const verify = (req, res, next) => {
   jwt.verify(authorization, TOKEN_SECRET, (err, value) => {
     if(err) return res.status(403).json({ error: 'Invalid token' });
     req.user = value.data;
+    req.body = { ...req.body, user: value.data }
     next();
   });
 }
