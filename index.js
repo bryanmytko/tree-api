@@ -5,12 +5,14 @@ const dotenv = require('dotenv');
 dotenv.config();
 
 const app = express();
+const dbURI = 'mongodb://localhost/evenflow';
 
 const authRoute = require('./routes/auth');
-const dbURI = 'mongodb://localhost/evenflow';
+const nodeRoute = require('./routes/node');
 
 app.use(express.json());
 app.use('/api/auth', authRoute);
+app.use('/api/node', nodeRoute);
 
 mongoose.connect(dbURI, { useNewUrlParser: true, useUnifiedTopology: true });
 const db = mongoose.connection;
