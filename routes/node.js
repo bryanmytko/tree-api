@@ -27,17 +27,16 @@ router.post('/create', middleware.verify, (req, res) => {
   });
 });
 
-router.get('/:id', middleware.verify, (req, res) => {
-  const depth = req.params.depth || 1; // @TODO implement this
+router.get('/:id', middleware.verify, async (req, res) => {
+  const depth = req.params.depth || 3; // DEPTH_DEFAULT
   
   const id = req.params.id;
-  Node.findById(id).then(node => {
-    if(!node) return res.status(404).json({ error: 'Not found.' });
-    Node.find({ parent: node._id }).lean().then(children => {
-      const response = { ...node.toObject(), children };
-      res.status(200).json({ response });
-    });
-  });
+  const node = await Node.findById(id);
+
+  if(!node) return res.status(404).json({ error: 'Not found.' });
+  const children = await Node.find({ parent: node._id });
+
+  return res.status(200).json({ ...node.toObject(), children });
 });
 
 module.exports = router;
