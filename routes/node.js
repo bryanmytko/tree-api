@@ -28,15 +28,26 @@ router.post('/create', middleware.verify, (req, res) => {
 });
 
 router.get('/:id', middleware.verify, async (req, res) => {
-  const depth = req.params.depth || 3; // DEPTH_DEFAULT
-  
-  const id = req.params.id;
+  const { id } = req.params;
   const node = await Node.findById(id);
 
   if(!node) return res.status(404).json({ error: 'Not found.' });
   const children = await Node.find({ parent: node._id });
 
   return res.status(200).json({ ...node.toObject(), children });
+});
+
+router.get('/', middleware.verify, async (req, res) => {
+  const { user } = req.body;
+  const nodes = await Node.find({ user: user._id, parent: null });
+  const response = await Promise.all(
+    nodes.map(async node => {
+      const children = await Node.find({ parent: node._id });
+      return { ...node.toObject(), children };
+    })
+  );
+
+  return res.status(200).json({ nodes: response });
 });
 
 module.exports = router;

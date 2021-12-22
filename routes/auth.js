@@ -32,7 +32,7 @@ router.post('/login', async (req, res) => {
 
   const user = await User.findOne({ email }).lean();
 
-  if(!user) return invalidLogin();
+  if(!user) return invalidLogin(res);
 
   bcrypt.compare(password, user.password, (error, match) => {
     if(error) return res.status(500).json({ error });
