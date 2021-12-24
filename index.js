@@ -2,7 +2,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const dotenv = require('dotenv');
 const cors = require('cors');
-
+const pino = require('pino-http')();
 
 dotenv.config();
 
@@ -12,8 +12,13 @@ const dbURI = 'mongodb://localhost/tree-api';
 const authRoute = require('./routes/auth');
 const nodeRoute = require('./routes/node');
 
+app.use(pino);
 app.use(cors({ origin: '*' }));
 app.use(express.json());
+app.use((req, res, next) => {
+  req.log.info(req.url)
+  next();
+});
 app.use('/api/auth', authRoute);
 app.use('/api/node', nodeRoute);
 
