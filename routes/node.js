@@ -39,28 +39,17 @@ router.get('/:id', middleware.verify, async (req, res) => {
 
 router.get('/children/:id', middleware.verify, async (req, res) => {
   const { id } = req.params;
-  const nodes = await Node.find({ parent: id });
-  const response = await Promise.all(
-    nodes.map(async node => {
-      const children = await Node.find({ parent: node._id });
-      return { ...node.toObject(), children };
-    })
-  );
+  const parent = await Node.findById(id);
+  const children = await Node.find({ parent: parent._id });
 
-  return res.status(200).json({ nodes: response });
+  return res.status(200).json({ node: parent, children });
 });
 
 router.get('/', middleware.verify, async (req, res) => {
   const { user } = req.body;
   const nodes = await Node.find({ user: user._id, parent: null });
-  const response = await Promise.all(
-    nodes.map(async node => {
-      const children = await Node.find({ parent: node._id });
-      return { ...node.toObject(), children };
-    })
-  );
 
-  return res.status(200).json({ nodes: response });
+  return res.status(200).json({ nodes });
 });
 
 module.exports = router;
