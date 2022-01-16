@@ -7,7 +7,7 @@ const pino = require('pino-http')();
 dotenv.config();
 
 const app = express();
-const dbURI = 'mongodb://localhost/tree-api';
+const dbURI = process.env.DB_URI
 
 const authRoute = require('./routes/auth');
 const nodeRoute = require('./routes/node');
