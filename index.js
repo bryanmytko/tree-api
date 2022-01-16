@@ -7,7 +7,7 @@ const pino = require('pino-http')();
 dotenv.config();
 
 const app = express();
-const dbURI = process.env.DB_URI
+const MONGO_URL = process.env.MONGO_URL;
 
 const authRoute = require('./routes/auth');
 const nodeRoute = require('./routes/node');
@@ -22,11 +22,11 @@ app.use((req, res, next) => {
 app.use('/api/auth', authRoute);
 app.use('/api/node', nodeRoute);
 
-mongoose.connect(dbURI, { useNewUrlParser: true, useUnifiedTopology: true });
+mongoose.connect(MONGO_URL, { useNewUrlParser: true, useUnifiedTopology: true });
 const db = mongoose.connection;
 
 db.once('open', () => console.log('DB connected.'));
 db.on('error', err => console.log('Error:', err));
 
-app.listen(3000, () => console.log('Server started...'));
+app.listen(5000, () => console.log('Server started...'));
 

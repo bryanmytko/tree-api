@@ -1,6 +1,7 @@
 const express = require('express');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const logger = require('pino')();
 
 const router = express.Router();
 
@@ -12,19 +13,23 @@ const { TOKEN_SECRET } = process.env;
 
 const invalidLogin = (res) => res.status(400).json({ error: 'Invalid login.' });
 
-router.post('/signup', (req, res) => {
+router.post('/signup', async (req, res) => {
   const { email, password } = req.body;
 
-  bcrypt.hash(password, ROUNDS, async (error, hash) => {
-    if(error) return res.status(500).json(error);
+  logger.info('Request: ' + req);
+  logger.info(`TOKEN SECRET: ${TOKEN_SECRET}`);
 
+  try {
+    const hash = await bcrypt.hash(password, ROUNDS);
     const newUser = User({ email, password: hash });
     const user = await newUser.save().catch(error => {
       return res.status(500).json({ error });
     });
 
     return res.status(200).json({ token: generateToken(user.toObject()) });
-  });
+  } catch(err) {
+    return res.status(500).send({ error: 'Bcrypt Error' });
+  }
 });
 
 router.post('/login', async (req, res) => {
