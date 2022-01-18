@@ -6,43 +6,54 @@ const Node = require('../models/node');
 const User = require('../models/user');
 const middleware = require('../middleware');
 
-router.post('/create', middleware.verify, (req, res) => {
+router.post('/create', middleware.verify, async (req, res) => {
   const { user, title, payload, parentId = null } = req.body;
 
-  User.findById(user._id).then(user => {
-    if(!user) return res.status(400).json({ error: 'User missing.' });
+  const foundUser = await User.findById(user._id);
+  const parent = await Node.findById(parentId);
 
-    Node.findById(parentId).then(parent => {
-      const newNode = Node({
-        title,
-        payload,
-        user: user._id,
-        parent: parent ? parent._id : null
-      });
-      
-      newNode.save()
-        .then(user => res.status(201).json({ node: newNode.toObject() }))
-        .catch(err => res.status(500).json({ err }))
-    });
+  if(!foundUser) return res.status(400).json({ error: 'User missing.' });
+
+  const newNode = Node({
+    title,
+    payload,
+    user: user._id,
+    parent: parent ? parent._id : null
   });
+
+  if(parent){
+    parent.children.push(newNode);
+    await parent.save();
+  }
+
+  try {
+    await newNode.save();
+    return res.status(201).json({ node: newNode.toObject() });
+  } catch(err) {
+    return res.status(500).json({ err });
+  }
 });
 
 router.get('/:id', middleware.verify, async (req, res) => {
   const { id } = req.params;
-  const node = await Node.findById(id);
+  const node = await Node.findById(id)
+    .populate({
+      path: 'children',
+      model: 'Node'
+    });
 
   if(!node) return res.status(404).json({ error: 'Not found.' });
-  const children = await Node.find({ parent: node._id });
 
-  return res.status(200).json({ ...node.toObject(), children });
+  return res.status(200).json({ node });
 });
 
 router.get('/children/:id', middleware.verify, async (req, res) => {
   const { id } = req.params;
-  const parent = await Node.findById(id);
-  const children = await Node.find({ parent: parent._id });
 
-  return res.status(200).json({ node: parent, children });
+  /* Our Node schema has a middleware hook to recursively populate children */
+  const nodes = await Node.findOne({ _id: id });
+
+  return res.status(200).json({ nodes });
 });
 
 router.get('/', middleware.verify, async (req, res) => {
