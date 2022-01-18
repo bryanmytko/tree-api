@@ -16,9 +16,6 @@ const invalidLogin = (res) => res.status(400).json({ error: 'Invalid login.' });
 router.post('/signup', async (req, res) => {
   const { email, password } = req.body;
 
-  logger.info('Request: ' + req);
-  logger.info(`TOKEN SECRET: ${TOKEN_SECRET}`);
-
   try {
     const hash = await bcrypt.hash(password, ROUNDS);
     const newUser = User({ email, password: hash });
