@@ -28,6 +28,16 @@ router.get('/', middleware.verify, async (req, res) => {
   return res.status(200).json({ nodes });
 });
 
+router.put('/update/:id', middleware.verify, async (req, res) => {
+  const { id } = req.params;
+  const { title, payload } = req.body;
+
+  await Node.findByIdAndUpdate(id, { title, payload });
+  const node = await Node.findById(id);
+
+  return res.status(200).json({ node });
+});
+
 router.get('/children/:id', middleware.verify, async (req, res) => {
   const { id } = req.params;
 
