@@ -30,9 +30,9 @@ router.get('/', middleware.verify, async (req, res) => {
 
 router.put('/update/:id', middleware.verify, async (req, res) => {
   const { id } = req.params;
-  const { title, payload } = req.body;
+  const { title, payload, private } = req.body;
 
-  await Node.findByIdAndUpdate(id, { title, payload });
+  await Node.findByIdAndUpdate(id, { title, payload, private });
   const node = await Node.findById(id);
 
   return res.status(200).json({ node });
@@ -56,6 +56,17 @@ router.get('/:id', middleware.verify, async (req, res) => {
     });
 
   if(!node) return res.status(404).json({ error: 'Not found.' });
+
+  return res.status(200).json({ node });
+});
+
+/* This is a public URL and does not require verification */
+router.get('/slug/:id', async (req, res) => {
+  const { id: slug } = req.params;
+  const node = await Node.findOne({ slug });
+
+  if(!node) return res.status(404).json({ error: 'Not found.' });
+  if(node.private) return res.status(403).json({});
 
   return res.status(200).json({ node });
 });
