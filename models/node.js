@@ -1,8 +1,18 @@
 const mongoose = require('mongoose');
+const { nanoid } = require('nanoid');
 
 const model = mongoose.Schema({
   title: String,
   payload: String,
+  slug: {
+    type: String,
+    default: generateSlug,
+    unique: true
+  },
+  private: {
+    type: Boolean,
+    default: false
+  },
   user: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
@@ -17,6 +27,10 @@ const model = mongoose.Schema({
     ref: "Node",
   }],
 });
+
+function generateSlug() {
+  return nanoid(10);
+}
 
 function populateChildren(next) {
   this.populate({
