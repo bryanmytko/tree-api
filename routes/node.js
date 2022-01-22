@@ -38,6 +38,14 @@ router.put('/update/:id', middleware.verify, async (req, res) => {
   return res.status(200).json({ node });
 });
 
+router.put('/private/:id', middleware.verify, async (req, res) => {
+  const { id } = req.params;
+  const node = await Node.findById(id);
+  const updatedNode = await Node.findByIdAndUpdate(id, { private: !node.private });
+
+  return res.status(200).json({ node: updatedNode });
+});
+
 router.get('/children/:id', middleware.verify, async (req, res) => {
   const { id } = req.params;
 
@@ -66,7 +74,7 @@ router.get('/slug/:id', async (req, res) => {
   const node = await Node.findOne({ slug });
 
   if(!node) return res.status(404).json({ error: 'Not found.' });
-  if(node.private) return res.status(403).json({});
+  if(node.private) return res.status(200).json({});
 
   return res.status(200).json({ node });
 });
