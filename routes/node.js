@@ -74,7 +74,6 @@ router.get('/slug/:id', async (req, res) => {
   const node = await Node.findOne({ slug });
 
   if(!node) return res.status(404).json({ error: 'Not found.' });
-  if(node.private) return res.status(200).json({});
 
   return res.status(200).json({ node });
 });
