@@ -15,17 +15,14 @@ const invalidLogin = (res) => res.status(400).json({ error: 'Invalid login.' });
 
 router.post('/signup', async (req, res) => {
   const { email, password } = req.body;
+  const hash = await bcrypt.hash(password, ROUNDS);
+  const newUser = new User({ email, password: hash });
 
   try {
-    const hash = await bcrypt.hash(password, ROUNDS);
-    const newUser = User({ email, password: hash });
-    const user = await newUser.save().catch(error => {
-      return res.status(500).json({ error });
-    });
-
+    const user = await newUser.save();
     return res.status(200).json({ token: generateToken(user.toObject()) });
   } catch(err) {
-    return res.status(500).send({ error: 'Bcrypt Error' });
+    return res.status(400).json({ error: err });
   }
 });
 
