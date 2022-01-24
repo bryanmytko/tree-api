@@ -22,7 +22,11 @@ app.use((req, res, next) => {
 app.use('/api/auth', authRoute);
 app.use('/api/node', nodeRoute);
 
-mongoose.connect(MONGO_URL, { useNewUrlParser: true, useUnifiedTopology: true });
+mongoose.connect(MONGO_URL, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+  autoIndex: true
+});
 const db = mongoose.connection;
 
 db.once('open', () => console.log('DB connected.'));
