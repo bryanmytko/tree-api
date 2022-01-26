@@ -12,29 +12,30 @@ const MONGO_URL = process.env.MONGO_URL;
 const authRoute = require('./routes/auth');
 const nodeRoute = require('./routes/node');
 
-app.use(pino);
 app.use(cors({ origin: '*' }));
 app.use(express.json());
-app.use((req, res, next) => {
-  req.log.info(req.url)
-  next();
-});
+
 app.use('/api/auth', authRoute);
 app.use('/api/node', nodeRoute);
 
-mongoose.connect(MONGO_URL, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-  autoIndex: true
-});
-const db = mongoose.connection;
-
-db.once('open', () => console.log('DB connected.'));
-db.on('error', err => console.log('Error:', err));
-
-if(NODE_ENV === 'test') {
+if(process.env.NODE_ENV === 'test') {
   module.exports = app;
 } else {
+  app.use(pino);
+  app.use((req, res, next) => {
+    req.log.info(req.url)
+    next();
+  });
+
+  mongoose.connect(MONGO_URL, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+    autoIndex: true
+  });
+  const db = mongoose.connection;
+
+  db.once('open', () => console.log('DB connected.'));
+  db.on('error', err => console.log('Error:', err));
+
   app.listen(5000, () => console.log('Server started...'));
 }
-
