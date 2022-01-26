@@ -32,5 +32,9 @@ const db = mongoose.connection;
 db.once('open', () => console.log('DB connected.'));
 db.on('error', err => console.log('Error:', err));
 
-app.listen(5000, () => console.log('Server started...'));
+if(NODE_ENV === 'test') {
+  module.exports = app;
+} else {
+  app.listen(5000, () => console.log('Server started...'));
+}
 
