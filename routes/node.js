@@ -28,7 +28,7 @@ router.get('/', middleware.verify, async (req, res) => {
   return res.status(200).json({ nodes });
 });
 
-
+/* This endpoint is deprecated as /:id accomplishes the same */
 router.get('/children/:id', middleware.verify, async (req, res) => {
   const { id } = req.params;
 
@@ -86,7 +86,7 @@ router.post('/create', middleware.verify, async (req, res) => {
     await newNode.save();
     return res.status(201).json({ node: newNode.toObject() });
   } catch(err) {
-    return res.status(500).json({ err });
+    return res.status(400).json({ error: `${err.name}: ${err.message}` });
   }
 });
 
