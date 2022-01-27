@@ -261,3 +261,40 @@ describe('PUT /api/node/private/:id', () => {
       });
   });
 });
+
+describe('DELETE /api/node/delete/:id', () => {
+  it('should delete a node and it\'s children', async () => {
+    const child = await Node({ user, title: 'John Diggle'}).save();
+    const node = await Node({ user, title: 'Felicity Smoak', children: [child] }).save();
+
+    await supertest(app)
+      .delete(`/api/node/delete/${node._id}`)
+      .set('authorization', token)
+      .expect(200)
+      .then(response => {
+        expect(response.body).toEqual({});
+      });
+
+    await supertest(app)
+      .get(`/api/node/${node._id}`)
+      .set('authorization', token)
+      .expect(404);
+
+    await supertest(app)
+      .get(`/api/node/${child._id}`)
+      .set('authorization', token)
+      .expect(404);
+  });
+
+  it('should return an empty array if the node is not found', async () => {
+    const node = await Node({ user, title: 'John Diggle'});
+
+    await supertest(app)
+      .delete(`/api/node/delete/${node._id}`)
+      .set('authorization', token)
+      .expect(200)
+      .then(response => {
+        expect(response.body).toEqual({});
+      });
+  });
+});
