@@ -28,23 +28,6 @@ router.get('/', middleware.verify, async (req, res) => {
   return res.status(200).json({ nodes });
 });
 
-router.put('/update/:id', middleware.verify, async (req, res) => {
-  const { id } = req.params;
-  const { title, payload, private: pr } = req.body;
-
-  await Node.findByIdAndUpdate(id, { title, payload, private: pr });
-  const node = await Node.findById(id);
-
-  return res.status(200).json({ node });
-});
-
-router.put('/private/:id', middleware.verify, async (req, res) => {
-  const { id } = req.params;
-  const node = await Node.findById(id);
-  const updatedNode = await Node.findByIdAndUpdate(id, { private: !node.private });
-
-  return res.status(200).json({ node: updatedNode });
-});
 
 router.get('/children/:id', middleware.verify, async (req, res) => {
   const { id } = req.params;
@@ -104,6 +87,24 @@ router.post('/create', middleware.verify, async (req, res) => {
   } catch(err) {
     return res.status(500).json({ err });
   }
+});
+
+router.put('/update/:id', middleware.verify, async (req, res) => {
+  const { id } = req.params;
+  const { title, payload, private: pr } = req.body;
+
+  await Node.findByIdAndUpdate(id, { title, payload, private: pr });
+  const node = await Node.findById(id);
+
+  return res.status(200).json({ node });
+});
+
+router.put('/private/:id', middleware.verify, async (req, res) => {
+  const { id } = req.params;
+  const node = await Node.findById(id);
+  const updatedNode = await Node.findByIdAndUpdate(id, { private: !node.private });
+
+  return res.status(200).json({ node: updatedNode });
 });
 
 router.delete('/delete/:id', middleware.verify, async (req, res)  => {
