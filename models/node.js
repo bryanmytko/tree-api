@@ -2,7 +2,10 @@ const mongoose = require('mongoose');
 const { nanoid } = require('nanoid');
 
 const model = mongoose.Schema({
-  title: String,
+  title: {
+    type: String,
+    required: true
+  },
   payload: String,
   slug: {
     type: String,
