@@ -97,6 +97,8 @@ router.put('/update/:id', middleware.verify, async (req, res) => {
   await Node.findByIdAndUpdate(id, { title, payload, private: pr });
   const node = await Node.findById(id);
 
+  if(!node) return res.status(404).json({ error: 'Not found.' });
+
   return res.status(200).json({ node });
 });
 
