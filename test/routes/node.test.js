@@ -30,12 +30,12 @@ afterEach(done => {
 
 describe('GET /api/node', () => {
   it('should only return top level nodes for the user', async () => {
+    const title = 'foo';
     const anotherUser = await User({ email: 'paul@beatles.org', password: 'p@55w0rd' }).save();
-
-    const node1 = await Node({ user, parent: null, slug: 'abc' }).save();
-    const node2 = await Node({ user, parent: null, slug: 'rst' }).save();
-    const node3 = await Node({ user: anotherUser, parent: null, slug: 'uvw' }).save();
-    const node4 = await Node({ user, parent: user, slug: 'xyz' }).save();
+    const node1 = await Node({ user, title, parent: null, slug: 'abc' }).save();
+    const node2 = await Node({ user, title, parent: null, slug: 'rst' }).save();
+    const node3 = await Node({ user: anotherUser, title, parent: null, slug: 'uvw' }).save();
+    const node4 = await Node({ user, title, parent: user, slug: 'xyz' }).save();
 
     await supertest(app)
       .get('/api/node')
@@ -63,10 +63,11 @@ describe('GET /api/node', () => {
 
 describe('GET /api/node/children/:id', () => {
   it('should recursively get node and all children', async () => {
-    const grandchild = await Node({ user, slug: 'abc' }).save();
-    const child2 = await Node({ user, children: [grandchild._id], slug: 'rst' }).save();
-    const child = await Node({ user, slug: 'uvw' }).save();
-    const parent = await Node({ user, children: [child._id, child2._id], slug: 'xyz' }).save()
+    const title = 'foo';
+    const grandchild = await Node({ user, title, slug: 'abc' }).save();
+    const child2 = await Node({ user, title, children: [grandchild._id], slug: 'rst' }).save();
+    const child = await Node({ user, title, slug: 'uvw' }).save();
+    const parent = await Node({ user, title, children: [child._id, child2._id], slug: 'xyz' }).save()
 
     await supertest(app)
       .get(`/api/node/children/${parent._id}`)
@@ -87,6 +88,114 @@ describe('GET /api/node/children/:id', () => {
       .expect(404)
       .then(response => {
         expect(response.body.error).toEqual('Not found.');
+      });
+  });
+});
+
+describe('GET /api/node/:id', () => {
+  it('should recursively get node and all children', async () => {
+    const title = 'foo';
+    const grandchild = await Node({ user, title, slug: 'abc' }).save();
+    const child2 = await Node({ user, title, children: [grandchild._id], slug: 'rst' }).save();
+    const child = await Node({ user, title, slug: 'uvw' }).save();
+    const parent = await Node({ user, title, children: [child._id, child2._id], slug: 'xyz' }).save()
+
+    await supertest(app)
+      .get(`/api/node/${parent._id}`)
+      .set('authorization', token)
+      .expect(200)
+      .then(response => {
+        const { node } = response.body;
+        expect(node.slug).toEqual(parent.slug);
+        expect(node.children.map(n => n.slug)).toEqual([child.slug, child2.slug]);
+        expect(node.children[1].children[0].slug).toEqual(grandchild.slug);
+      });
+  });
+
+  it('should return a 404 if the node does not exist', async () => {
+    await supertest(app)
+      .get('/api/node/61f25e036a52eef36905d1f9')
+      .set('authorization', token)
+      .expect(404)
+      .then(response => {
+        expect(response.body.error).toEqual('Not found.');
+      });
+  });
+});
+
+describe('GET /api/slug/:id', () => {
+  it('should get node by slug and not require auth', async () => {
+    const title = 'foo';
+    const grandchild = await Node({ user, title, slug: 'abc' }).save();
+    const child2 = await Node({ user, title, children: [grandchild._id], slug: 'rst' }).save();
+    const child = await Node({ user, title, slug: 'uvw' }).save();
+    const parent = await Node({ user, title, children: [child._id, child2._id], slug: 'xyz' }).save()
+
+    await supertest(app)
+      .get(`/api/node/slug/${parent.slug}`)
+      .expect(200)
+      .then(response => {
+        const { node } = response.body;
+        expect(node.slug).toEqual(parent.slug);
+        expect(node.children.map(n => n.slug)).toEqual([child.slug, child2.slug]);
+        expect(node.children[1].children[0].slug).toEqual(grandchild.slug);
+      });
+  });
+
+  it('should return a 404 if the node does not exist', async () => {
+    await supertest(app)
+      .get('/api/node/slug/9000')
+      .set('authorization', token)
+      .expect(404)
+      .then(response => {
+        expect(response.body.error).toEqual('Not found.');
+      });
+  });
+});
+
+describe('POST /api/create', () => {
+  it('should create a node if the request is valid', async () => {
+    const request = { user, title: 'Baseball', payload: 'Lorem ipsum.' };
+    await supertest(app)
+      .post('/api/node/create')
+      .set('Content-type', 'application/json')
+      .set('authorization', token)
+      .send(request)
+      .expect(201)
+      .then(response => {
+        const { node } = response.body;
+        expect(node.title).toEqual(request.title);
+        expect(node.payload).toEqual(request.payload);
+      });
+  });
+
+  it('should return a 400 if the user is not found', async () => {
+    const anotherUser = User({ email: 'paul@beatles.org', password: 'p@55w0rd' });
+    const anotherToken = jwt.sign({ data: anotherUser.toObject() }, TOKEN_SECRET, { expiresIn: '24h' });
+    const request = { anotherUser, title: 'Baseball', payload: 'Lorem ipsum.' };
+
+    await supertest(app)
+      .post('/api/node/create')
+      .set('Content-type', 'application/json')
+      .set('authorization', anotherToken)
+      .send(request)
+      .expect(400)
+      .then(response => {
+        expect(response.body.error).toEqual('User missing.');
+      });
+  });
+
+  it('should return a 400 if the request is invalid', async () => {
+    const request = {};
+
+    await supertest(app)
+      .post('/api/node/create')
+      .set('Content-type', 'application/json')
+      .set('authorization', token)
+      .send(request)
+      .expect(400)
+      .then(response => {
+        expect(response.body.error).toMatch(/ValidationError/);
       });
   });
 });
