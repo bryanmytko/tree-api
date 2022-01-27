@@ -39,7 +39,30 @@ describe('GET /api/node', () => {
       .then((response) => {
         const { nodes } = response.body;
         expect(nodes.length).toEqual(2);
-        expect(nodes.map(n => n.slug)).toEqual([nodes[0].slug, nodes[1].slug]);
+        expect(nodes.map(n => n.slug)).toEqual([node1.slug, node2.slug]);
+      });
+  });
+});
+
+describe('GET /api/node/children/:id', () => {
+  it('should recursively get node and all children', async () => {
+    const user = await User({ email: 'john@beatles.org', password: 'password' }).save();
+    const grandchild = await Node({ user, slug: 'abc' }).save();
+    const child2 = await Node({ user, children: [grandchild._id], slug: 'rst' }).save();
+    const child = await Node({ user, slug: 'uvw' }).save();
+    const parent = await Node({ user, children: [child._id, child2._id], slug: 'xyz' }).save()
+
+    const token = jwt.sign({ data: user.toObject() }, TOKEN_SECRET, { expiresIn: '24h' });
+
+    await supertest(app)
+      .get(`/api/node/children/${parent._id}`)
+      .set('authorization', token)
+      .expect(200)
+      .then((response) => {
+        const { nodes } = response.body;
+        expect(nodes.slug).toEqual(parent.slug);
+        expect(nodes.children.map(n => n.slug)).toEqual([child.slug, child2.slug]);
+        expect(nodes.children[1].children[0].slug).toEqual(grandchild.slug);
       });
   });
 });
