@@ -105,7 +105,11 @@ router.put('/update/:id', middleware.verify, async (req, res) => {
 router.put('/private/:id', middleware.verify, async (req, res) => {
   const { id } = req.params;
   const node = await Node.findById(id);
-  const updatedNode = await Node.findByIdAndUpdate(id, { private: !node.private });
+
+  if(!node) return res.status(404).json({ error: 'Not found.' });
+
+  await Node.findByIdAndUpdate(id, { private: !node.private });
+  const updatedNode = await Node.findById(id);
 
   return res.status(200).json({ node: updatedNode });
 });
