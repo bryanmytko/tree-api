@@ -33,9 +33,10 @@ router.get('/children/:id', middleware.verify, async (req, res) => {
   const { id } = req.params;
 
   /* Our Node schema has a middleware hook to recursively populate children */
-  const nodes = await Node.findOne({ _id: id });
+  const node = await Node.findOne({ _id: id });
+  if(!node) return res.status(404).json({ error: 'Not found.' });
 
-  return res.status(200).json({ nodes });
+  return res.status(200).json({ node });
 });
 
 router.get('/:id', middleware.verify, async (req, res) => {
@@ -109,8 +110,8 @@ router.put('/private/:id', middleware.verify, async (req, res) => {
 
 router.delete('/delete/:id', middleware.verify, async (req, res)  => {
   const { id } = req.params;
-  const nodes = await Node.findOne({ _id: id });
-  const nodeIds = recursivelyFindChildren(nodes.toObject(), '_id');
+  const node = await Node.findOne({ _id: id });
+  const nodeIds = recursivelyFindChildren(node.toObject(), '_id');
 
   try {
     await Node.deleteMany({ _id: { $in: nodeIds }});
