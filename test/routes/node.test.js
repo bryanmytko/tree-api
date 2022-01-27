@@ -123,7 +123,7 @@ describe('GET /api/node/:id', () => {
   });
 });
 
-describe('GET /api/slug/:id', () => {
+describe('GET /api/node/slug/:id', () => {
   it('should get node by slug and not require auth', async () => {
     const title = 'foo';
     const grandchild = await Node({ user, title, slug: 'abc' }).save();
@@ -153,7 +153,7 @@ describe('GET /api/slug/:id', () => {
   });
 });
 
-describe('POST /api/create', () => {
+describe('POST /api/node/create', () => {
   it('should create a node if the request is valid', async () => {
     const request = { user, title: 'Baseball', payload: 'Lorem ipsum.' };
     await supertest(app)
@@ -196,6 +196,40 @@ describe('POST /api/create', () => {
       .expect(400)
       .then(response => {
         expect(response.body.error).toMatch(/ValidationError/);
+      });
+  });
+});
+
+describe('PUT /api/node/update/:id', () => {
+  it('should update a node if the request is valid', async () => {
+    const node = await Node({ user, title: 'Arrow', payload: 'Lorem Ipsum.' }).save();
+    const request = { user, title: 'Green Arrow' };
+
+    await supertest(app)
+      .put(`/api/node/update/${node._id}`)
+      .set('Content-type', 'application/json')
+      .set('authorization', token)
+      .send(request)
+      .expect(200)
+      .then(response => {
+        const { node } = response.body;
+        expect(node.title).toEqual(request.title);
+        expect(node.payload).toEqual('Lorem Ipsum.');
+      });
+  });
+
+  it('should return a 404 if the node does not exist', async () => {
+    const node = await Node({ user, title: 'Arrow', payload: 'Lorem Ipsum.' });
+    const request = { user, title: 'Green Arrow' };
+
+    await supertest(app)
+      .put(`/api/node/update/${node._id}`)
+      .set('Content-type', 'application/json')
+      .set('authorization', token)
+      .send(request)
+      .expect(404)
+      .then(response => {
+        expect(response.body.error).toEqual('Not found.');
       });
   });
 });
