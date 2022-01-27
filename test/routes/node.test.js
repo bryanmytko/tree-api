@@ -233,3 +233,31 @@ describe('PUT /api/node/update/:id', () => {
       });
   });
 });
+
+describe('PUT /api/node/private/:id', () => {
+  it('should toggle a node\'s private value if the request is valid', async () => {
+    const node = await Node({ user, title: 'Arrow', private: false }).save();
+
+    await supertest(app)
+      .put(`/api/node/private/${node._id}`)
+      .set('Content-type', 'application/json')
+      .set('authorization', token)
+      .expect(200)
+      .then(response => {
+        expect(response.body.node.private).toBe(true);
+      });
+  });
+
+  it('should return a 404 if the node does not exist', async () => {
+    const node = await Node({ user, title: 'Arrow', payload: 'Lorem Ipsum.' });
+
+    await supertest(app)
+      .put(`/api/node/private/${node._id}`)
+      .set('Content-type', 'application/json')
+      .set('authorization', token)
+      .expect(404)
+      .then(response => {
+        expect(response.body.error).toEqual('Not found.');
+      });
+  });
+});
