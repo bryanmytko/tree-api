@@ -117,6 +117,10 @@ router.put('/private/:id', middleware.verify, async (req, res) => {
 router.delete('/delete/:id', middleware.verify, async (req, res)  => {
   const { id } = req.params;
   const node = await Node.findOne({ _id: id });
+
+  /* We don't want to give any insight if the node does not exist */
+  if(!node) return res.status(200).json({});
+
   const nodeIds = recursivelyFindChildren(node.toObject(), '_id');
 
   try {
