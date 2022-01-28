@@ -7,6 +7,9 @@
     "start": "node index.js",
     "test": "NODE_ENV=test jest"
   },
+  "jest": {
+    "setupFilesAfterEnv": ["./test/setup.js"]
+  },
   "author": "",
   "license": "ISC",
   "dependencies": {
