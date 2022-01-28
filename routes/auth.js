@@ -42,7 +42,7 @@ router.post('/login', async (req, res) => {
 });
 
 router.get('/verify-token', middleware.verify, (req, res) => (
-  res.status(200).json({ user: req.user });
+  res.status(200).json({ user: req.user })
 ));
 
 function generateToken(user) {
