@@ -41,9 +41,9 @@ router.post('/login', async (req, res) => {
   });
 });
 
-router.get('/verify-token', middleware.verify, (req, res) => {
-  res.status(200).json(req.user);
-});
+router.get('/verify-token', middleware.verify, (req, res) => (
+  res.status(200).json({ user: req.user });
+));
 
 function generateToken(user) {
   const { password, ...data } = user; // strip out the password
