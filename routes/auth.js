@@ -20,9 +20,9 @@ router.post('/signup', async (req, res) => {
 
   try {
     const user = await newUser.save();
-    return res.status(200).json({ token: generateToken(user.toObject()) });
+    return res.status(201).json({ token: generateToken(user.toObject()) });
   } catch(err) {
-    return res.status(400).json({ error: err });
+    return res.status(400).json({ error: `${err.name}: ${err.message}` });
   }
 });
 
