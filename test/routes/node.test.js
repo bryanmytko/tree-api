@@ -6,29 +6,18 @@ const app = require('../../index');
 const Node = require('../../models/node');
 const User = require('../../models/user');
 
-const { MONGO_TEST_URL, TOKEN_SECRET } = process.env;
+const { TOKEN_SECRET } = process.env;
+process.env.TEST_SUITE = 'test-nodes';
 
 let user;
 let token;
 
-beforeEach(done => {
-  mongoose.connect(MONGO_TEST_URL,
-    { useNewUrlParser: true, useUnifiedTopology: true },
-    () => done());
-});
-
-beforeEach(async () => {
-  user = await User({ email: 'john@beatles.org', password: 'password' }).save();
-  token = jwt.sign({ data: user.toObject() }, TOKEN_SECRET, { expiresIn: '24h' });
-});
-
-afterEach(done => {
-  mongoose.connection.db.dropDatabase(() => {
-    mongoose.connection.close(() => done())
-  });
-});
-
 describe('GET /api/node', () => {
+  beforeEach(async () => {
+    user = await User({ email: 'john@beatles.org', password: 'password' }).save();
+    token = jwt.sign({ data: user.toObject() }, TOKEN_SECRET, { expiresIn: '24h' });
+  });
+
   it('should only return top level nodes for the user', async () => {
     const title = 'foo';
     const anotherUser = await User({ email: 'paul@beatles.org', password: 'p@55w0rd' }).save();
@@ -62,6 +51,11 @@ describe('GET /api/node', () => {
 });
 
 describe('GET /api/node/children/:id', () => {
+  beforeEach(async () => {
+    user = await User({ email: 'john@beatles.org', password: 'password' }).save();
+    token = jwt.sign({ data: user.toObject() }, TOKEN_SECRET, { expiresIn: '24h' });
+  });
+
   it('should recursively get node and all children', async () => {
     const title = 'foo';
     const grandchild = await Node({ user, title, slug: 'abc' }).save();
@@ -93,6 +87,11 @@ describe('GET /api/node/children/:id', () => {
 });
 
 describe('GET /api/node/:id', () => {
+  beforeEach(async () => {
+    user = await User({ email: 'john@beatles.org', password: 'password' }).save();
+    token = jwt.sign({ data: user.toObject() }, TOKEN_SECRET, { expiresIn: '24h' });
+  });
+
   it('should recursively get node and all children', async () => {
     const title = 'foo';
     const grandchild = await Node({ user, title, slug: 'abc' }).save();
@@ -124,6 +123,10 @@ describe('GET /api/node/:id', () => {
 });
 
 describe('GET /api/node/slug/:id', () => {
+  beforeEach(async () => {
+    user = await User({ email: 'john@beatles.org', password: 'password' }).save();
+  });
+
   it('should get node by slug and not require auth', async () => {
     const title = 'foo';
     const grandchild = await Node({ user, title, slug: 'abc' }).save();
@@ -154,6 +157,11 @@ describe('GET /api/node/slug/:id', () => {
 });
 
 describe('POST /api/node/create', () => {
+  beforeEach(async () => {
+    user = await User({ email: 'john@beatles.org', password: 'password' }).save();
+    token = jwt.sign({ data: user.toObject() }, TOKEN_SECRET, { expiresIn: '24h' });
+  });
+
   it('should create a node if the request is valid', async () => {
     const request = { user, title: 'Baseball', payload: 'Lorem ipsum.' };
     await supertest(app)
@@ -201,6 +209,11 @@ describe('POST /api/node/create', () => {
 });
 
 describe('PUT /api/node/update/:id', () => {
+  beforeEach(async () => {
+    user = await User({ email: 'john@beatles.org', password: 'password' }).save();
+    token = jwt.sign({ data: user.toObject() }, TOKEN_SECRET, { expiresIn: '24h' });
+  });
+
   it('should update a node if the request is valid', async () => {
     const node = await Node({ user, title: 'Arrow', payload: 'Lorem Ipsum.' }).save();
     const request = { user, title: 'Green Arrow' };
@@ -235,6 +248,11 @@ describe('PUT /api/node/update/:id', () => {
 });
 
 describe('PUT /api/node/private/:id', () => {
+  beforeEach(async () => {
+    user = await User({ email: 'john@beatles.org', password: 'password' }).save();
+    token = jwt.sign({ data: user.toObject() }, TOKEN_SECRET, { expiresIn: '24h' });
+  });
+
   it('should toggle a node\'s private value if the request is valid', async () => {
     const node = await Node({ user, title: 'Arrow', private: false }).save();
 
@@ -263,6 +281,11 @@ describe('PUT /api/node/private/:id', () => {
 });
 
 describe('DELETE /api/node/delete/:id', () => {
+  beforeEach(async () => {
+    user = await User({ email: 'john@beatles.org', password: 'password' }).save();
+    token = jwt.sign({ data: user.toObject() }, TOKEN_SECRET, { expiresIn: '24h' });
+  });
+
   it('should delete a node and it\'s children', async () => {
     const child = await Node({ user, title: 'John Diggle'}).save();
     const node = await Node({ user, title: 'Felicity Smoak', children: [child] }).save();
