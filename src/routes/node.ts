@@ -1,10 +1,10 @@
-import express from 'express';
-
 import { Router } from 'express';
 
 import Node from '../models/node';
 import User from '../models/user';
-import middleware from '../middleware';
+import { verify } from '../middleware/verify';
+
+const router = Router();
 
 const recursivelyFindChildren = (obj, searchKey, results = []) => {
   const r = results;
@@ -21,7 +21,7 @@ const recursivelyFindChildren = (obj, searchKey, results = []) => {
   return r;
 };
 
-router.get('/', middleware.verify, async (req, res) => {
+router.get('/', verify, async (req, res) => {
   const { user } = req.body;
   const nodes = await Node.find({ user: user._id, parent: null });
 
@@ -29,7 +29,7 @@ router.get('/', middleware.verify, async (req, res) => {
 });
 
 /* This endpoint is deprecated as /:id accomplishes the same */
-router.get('/children/:id', middleware.verify, async (req, res) => {
+router.get('/children/:id', verify, async (req, res) => {
   const { id } = req.params;
 
   /* Our Node schema has a middleware hook to recursively populate children */
@@ -39,7 +39,7 @@ router.get('/children/:id', middleware.verify, async (req, res) => {
   return res.status(200).json({ node });
 });
 
-router.get('/:id', middleware.verify, async (req, res) => {
+router.get('/:id', verify, async (req, res) => {
   const { id } = req.params;
   const node = await Node.findById(id)
     .populate({
@@ -62,7 +62,7 @@ router.get('/slug/:id', async (req, res) => {
   return res.status(200).json({ node });
 });
 
-router.post('/create', middleware.verify, async (req, res) => {
+router.post('/create', verify, async (req, res) => {
   const { user, title, payload, parentId = null } = req.body;
 
   const foundUser = await User.findById(user._id);
@@ -90,7 +90,7 @@ router.post('/create', middleware.verify, async (req, res) => {
   }
 });
 
-router.put('/update/:id', middleware.verify, async (req, res) => {
+router.put('/update/:id', verify, async (req, res) => {
   const { id } = req.params;
   const { title, payload, private: pr } = req.body;
 
@@ -102,7 +102,7 @@ router.put('/update/:id', middleware.verify, async (req, res) => {
   return res.status(200).json({ node });
 });
 
-router.put('/private/:id', middleware.verify, async (req, res) => {
+router.put('/private/:id', verify, async (req, res) => {
   const { id } = req.params;
   const node = await Node.findById(id);
 
@@ -114,7 +114,7 @@ router.put('/private/:id', middleware.verify, async (req, res) => {
   return res.status(200).json({ node: updatedNode });
 });
 
-router.delete('/delete/:id', middleware.verify, async (req, res)  => {
+router.delete('/delete/:id', verify, async (req, res)  => {
   const { id } = req.params;
   const node = await Node.findOne({ _id: id });
 
