@@ -12,9 +12,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
 const node_1 = __importDefault(require("../models/node"));
 const user_1 = __importDefault(require("../models/user"));
-const middleware_1 = __importDefault(require("../middleware"));
+const verify_1 = require("../middleware/verify");
+const router = (0, express_1.Router)();
 const recursivelyFindChildren = (obj, searchKey, results = []) => {
     const r = results;
     Object.keys(obj).forEach(key => {
@@ -28,13 +30,13 @@ const recursivelyFindChildren = (obj, searchKey, results = []) => {
     });
     return r;
 };
-router.get('/', middleware_1.default.verify, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+router.get('/', verify_1.verify, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { user } = req.body;
     const nodes = yield node_1.default.find({ user: user._id, parent: null });
     return res.status(200).json({ nodes });
 }));
 /* This endpoint is deprecated as /:id accomplishes the same */
-router.get('/children/:id', middleware_1.default.verify, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+router.get('/children/:id', verify_1.verify, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { id } = req.params;
     /* Our Node schema has a middleware hook to recursively populate children */
     const node = yield node_1.default.findOne({ _id: id });
@@ -42,7 +44,7 @@ router.get('/children/:id', middleware_1.default.verify, (req, res) => __awaiter
         return res.status(404).json({ error: 'Not found.' });
     return res.status(200).json({ node });
 }));
-router.get('/:id', middleware_1.default.verify, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+router.get('/:id', verify_1.verify, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { id } = req.params;
     const node = yield node_1.default.findById(id)
         .populate({
@@ -61,7 +63,7 @@ router.get('/slug/:id', (req, res) => __awaiter(void 0, void 0, void 0, function
         return res.status(404).json({ error: 'Not found.' });
     return res.status(200).json({ node });
 }));
-router.post('/create', middleware_1.default.verify, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+router.post('/create', verify_1.verify, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { user, title, payload, parentId = null } = req.body;
     const foundUser = yield user_1.default.findById(user._id);
     const parent = yield node_1.default.findById(parentId);
@@ -85,7 +87,7 @@ router.post('/create', middleware_1.default.verify, (req, res) => __awaiter(void
         return res.status(400).json({ error: `${err.name}: ${err.message}` });
     }
 }));
-router.put('/update/:id', middleware_1.default.verify, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+router.put('/update/:id', verify_1.verify, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { id } = req.params;
     const { title, payload, private: pr } = req.body;
     yield node_1.default.findByIdAndUpdate(id, { title, payload, private: pr });
@@ -94,7 +96,7 @@ router.put('/update/:id', middleware_1.default.verify, (req, res) => __awaiter(v
         return res.status(404).json({ error: 'Not found.' });
     return res.status(200).json({ node });
 }));
-router.put('/private/:id', middleware_1.default.verify, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+router.put('/private/:id', verify_1.verify, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { id } = req.params;
     const node = yield node_1.default.findById(id);
     if (!node)
@@ -103,7 +105,7 @@ router.put('/private/:id', middleware_1.default.verify, (req, res) => __awaiter(
     const updatedNode = yield node_1.default.findById(id);
     return res.status(200).json({ node: updatedNode });
 }));
-router.delete('/delete/:id', middleware_1.default.verify, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+router.delete('/delete/:id', verify_1.verify, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { id } = req.params;
     const node = yield node_1.default.findOne({ _id: id });
     /* We don't want to give any insight if the node does not exist */
