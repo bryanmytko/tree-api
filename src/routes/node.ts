@@ -1,10 +1,10 @@
-const express = require('express');
+import express from 'express';
 
-const router = express.Router();
+import { Router } from 'express';
 
-const Node = require('../models/node');
-const User = require('../models/user');
-const middleware = require('../middleware');
+import Node from '../models/node';
+import User from '../models/user';
+import middleware from '../middleware';
 
 const recursivelyFindChildren = (obj, searchKey, results = []) => {
   const r = results;
@@ -131,4 +131,4 @@ router.delete('/delete/:id', middleware.verify, async (req, res)  => {
   }
 });
 
-module.exports = router;
+export default router;

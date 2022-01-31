@@ -1,5 +1,5 @@
-const mongoose = require('mongoose');
-const { nanoid } = require('nanoid');
+import mongoose from 'mongoose';
+import { nanoid } from 'nanoid';
 
 const model = mongoose.Schema({
   title: {

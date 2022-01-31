@@ -1,12 +1,12 @@
-const express = require('express');
-const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken');
-const logger = require('pino')();
+import express from 'express';
+import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
+import pino from 'pino';
 
 const router = express.Router();
 
-const User = require('../models/user');
-const middleware = require('../middleware');
+import User from '../models/user';
+import middleware from '../middleware';
 
 const ROUNDS = 10;
 const { TOKEN_SECRET } = process.env;
@@ -51,4 +51,4 @@ function generateToken(user) {
   return jwt.sign({ data }, TOKEN_SECRET, { expiresIn: '24h' });
 }
 
-module.exports = router;
+export default router;
