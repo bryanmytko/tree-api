@@ -1,35 +1,21 @@
-import { Router } from 'express';
+import { RequestHandler, Response, Router } from 'express';
 
 import Node from '../models/node';
 import User from '../models/user';
-import { verify } from '../middleware/verify';
+import verify from '../middleware/verify';
+import { recursivelyFindChildren } from '../util';
 
 const router = Router();
 
-const recursivelyFindChildren = (obj, searchKey, results = []) => {
-  const r = results;
+router.get('/', verify, async (req: Request, res: Response) => {
+  // const { user } = req.body;
+  // const nodes = await Node.find({ user: user._id, parent: null });
 
-  Object.keys(obj).forEach(key => {
-    const value = obj[key];
-    if(key === searchKey){
-      r.push(value.toString());
-    } else if(key === 'children' && obj[key].length){
-      value.forEach(node => recursivelyFindChildren(node, searchKey, r));
-    }
-  });
-
-  return r;
-};
-
-router.get('/', verify, async (req, res) => {
-  const { user } = req.body;
-  const nodes = await Node.find({ user: user._id, parent: null });
-
-  return res.status(200).json({ nodes });
+  return res.status(200)//.json({ nodes });
 });
 
 /* This endpoint is deprecated as /:id accomplishes the same */
-router.get('/children/:id', verify, async (req, res) => {
+router.get('/children/:id', verify, async (req: TypedRequestParams<{ id: string }>, res: Response) => {
   const { id } = req.params;
 
   /* Our Node schema has a middleware hook to recursively populate children */
@@ -70,7 +56,7 @@ router.post('/create', verify, async (req, res) => {
 
   if(!foundUser) return res.status(400).json({ error: 'User missing.' });
 
-  const newNode = Node({
+  const newNode = new Node({
     title,
     payload,
     user: user._id,
@@ -78,7 +64,7 @@ router.post('/create', verify, async (req, res) => {
   });
 
   if(parent){
-    parent.children.push(newNode);
+    parent.children.push(newNode._id);
     await parent.save();
   }
 
@@ -127,7 +113,7 @@ router.delete('/delete/:id', verify, async (req, res)  => {
     await Node.deleteMany({ _id: { $in: nodeIds }});
     return res.status(200).json({});
   } catch(err) {
-    return res.status(500),json({ err });
+    return res.status(500).json({ err });
   }
 });
 
