@@ -1,7 +1,18 @@
-import mongoose from 'mongoose';
+import { NextFunction } from 'express';
+import { Schema, Types, model } from 'mongoose';
 import { nanoid } from 'nanoid';
 
-const model = mongoose.Schema({
+interface Node {
+  title: string,
+  payload: string,
+  slug?: string,
+  private: boolean,
+  user: Types.ObjectId,
+  parent?: Types.ObjectId | null,
+  children?: Types.ObjectId[]
+}
+
+const schema = new Schema<Node>({
   title: {
     type: String,
     required: true
@@ -17,16 +28,16 @@ const model = mongoose.Schema({
     default: false
   },
   user: {
-    type: mongoose.Schema.Types.ObjectId,
+    type: Schema.Types.ObjectId,
     ref: "User",
     required: true
   },
   parent: {
-    type: mongoose.Schema.Types.ObjectId,
+    type: Schema.Types.ObjectId,
     ref: "Node",
   },
   children: [{
-    type: mongoose.Schema.Types.ObjectId,
+    type: Schema.Types.ObjectId,
     ref: "Node",
   }],
 });
@@ -35,7 +46,7 @@ function generateSlug() {
   return nanoid(10);
 }
 
-function populateChildren(next) {
+function populateChildren(next: NextFunction) {
   this.populate({
     path: 'children',
     model: 'Node'
@@ -44,8 +55,10 @@ function populateChildren(next) {
   next();
 };
 
-model
+schema
   .pre('findOne', populateChildren)
   .pre('find', populateChildren)
 
-module.exports = new mongoose.model("Node", model);
+const Node = model<Node>('Node', schema);
+
+export default Node;
