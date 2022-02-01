@@ -1,4 +1,4 @@
-import express from 'express';
+import express, { Response } from 'express';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import pino from 'pino';
@@ -6,12 +6,12 @@ import pino from 'pino';
 const router = express.Router();
 
 import User from '../models/user';
-import middleware from '../middleware';
+import verify from '../middleware/verify';
 
 const ROUNDS = 10;
 const { TOKEN_SECRET } = process.env;
 
-const invalidLogin = (res) => res.status(400).json({ error: 'Invalid login.' });
+const invalidLogin = (res: Response) => res.status(400).json({ error: 'Invalid login.' });
 
 router.post('/signup', async (req, res) => {
   const { email, password } = req.body;
@@ -41,11 +41,11 @@ router.post('/login', async (req, res) => {
   });
 });
 
-router.get('/verify-token', middleware.verify, (req, res) => (
+router.get('/verify-token', verify, (req, res) => (
   res.status(200).json({ user: req.user })
 ));
 
-function generateToken(user) {
+function generateToken(user: any) {
   const { password, ...data } = user; // strip out the password
 
   return jwt.sign({ data }, TOKEN_SECRET, { expiresIn: '24h' });
