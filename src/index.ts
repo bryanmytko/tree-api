@@ -9,7 +9,9 @@ import nodeRoute from './routes/node';
 
 const logger = pino({
   level: 'info',
-  prettyPrint: process.env.NODE_ENV !== 'production'
+  transport: {
+   target: process.env.NODE_ENV !== 'production' ? 'pino-pretty' : ''
+  }
 });
 
 dotenv.config();
