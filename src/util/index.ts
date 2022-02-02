@@ -1,4 +1,6 @@
-const recursivelyFindChildren = (obj: { [char: string]: string }, searchKey: string, results: any[] = []) => {
+import { LeanDocument } from "mongoose";
+
+const recursivelyFindChildren = (obj: LeanDocument<any> | { [char: string]: string }, searchKey: string, results: any[] = []) => {
   const r = results;
 
   Object.keys(obj).forEach(key => {
@@ -6,7 +8,7 @@ const recursivelyFindChildren = (obj: { [char: string]: string }, searchKey: str
     if(key === searchKey){
       r.push(value.toString());
     } else if(key === 'children' && obj[key].length){
-      value.forEach((obj: { [char: string]: string }) => recursivelyFindChildren(obj, searchKey, r));
+      value.forEach((childObj: { [char: string]: string }) => recursivelyFindChildren(childObj, searchKey, r));
     }
   });
 
