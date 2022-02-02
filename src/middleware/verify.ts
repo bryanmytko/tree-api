@@ -1,5 +1,5 @@
 import jwt from 'jsonwebtoken';
-import { Response, NextFunction } from 'express';
+import { Request, Response, NextFunction } from 'express';
 import { Error } from 'mongoose';
 
 const { TOKEN_SECRET } = process.env;
