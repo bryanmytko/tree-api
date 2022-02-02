@@ -1,4 +1,4 @@
-import { RequestHandler, Response, Router } from 'express';
+import { Request, Response, Router } from 'express';
 
 import Node from '../models/node';
 import User from '../models/user';
@@ -8,14 +8,14 @@ import { recursivelyFindChildren } from '../util';
 const router = Router();
 
 router.get('/', verify, async (req: Request, res: Response) => {
-  // const { user } = req.body;
-  // const nodes = await Node.find({ user: user._id, parent: null });
+  const { user } = req.body;
+  const nodes = await Node.find({ user: user._id, parent: null });
 
-  return res.status(200)//.json({ nodes });
+  return res.status(200).json({ nodes });
 });
 
 /* This endpoint is deprecated as /:id accomplishes the same */
-router.get('/children/:id', verify, async (req: TypedRequestParams<{ id: string }>, res: Response) => {
+router.get('/children/:id', verify, async (req: Request, res: Response) => {
   const { id } = req.params;
 
   /* Our Node schema has a middleware hook to recursively populate children */
