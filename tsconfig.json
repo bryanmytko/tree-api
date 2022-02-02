@@ -9,7 +9,7 @@
     "outDir": "dist",
     "baseUrl": ".",
     "typeRoots": [
-      "./"
+      "src/types"
     ],
     "paths": {
       "*": [
