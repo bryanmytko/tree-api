@@ -19,7 +19,7 @@ test('.findOne should recursively find children', async () => {
   const parent = await Node({ user, title: 'A', children: [daughter, son._id] }).save();
 
   const foundNode = await Node.findOne({ _id: parent._id });
-  
+ 
   expect(foundNode.children.map(n => n.title)).toEqual([daughter.title, son.title]);
   expect(foundNode.children[0].children.map(n => n.title)).toEqual([grandson.title]);
   expect(foundNode.children[0].children[0].children.map(n => n.title)).toEqual([greatgranddaughter.title]);
