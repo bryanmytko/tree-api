@@ -3,8 +3,8 @@ const mongoose = require('mongoose');
 const jwt = require('jsonwebtoken');
 
 const app = require('../../index');
-const Node = require('../../models/node');
-const User = require('../../models/user');
+const Node = require('../../models/node').default;
+const User = require('../../models/user').default;
 
 const { TOKEN_SECRET } = process.env;
 process.env.TEST_SUITE = 'test-nodes';

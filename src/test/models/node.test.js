@@ -1,5 +1,5 @@
-const Node = require('../../models/node');
-const User = require('../../models/user');
+const Node = require('../../models/node').default;
+const User = require('../../models/user').default;
 
 process.env.TEST_SUITE = 'test-node-model';
 
