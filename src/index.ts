@@ -4,20 +4,19 @@ import dotenv from 'dotenv';
 import cors from 'cors';
 import pino from 'pino';
 
+import config from './config';
 import authRoute from './routes/auth';
 import nodeRoute from './routes/node';
 
 const logger = pino({
   level: 'info',
   transport: {
-   target: process.env.NODE_ENV !== 'production' ? 'pino-pretty' : ''
+   target: config.NODE_ENV !== 'production' ? 'pino-pretty' : ''
   }
 });
 
-dotenv.config();
-
 const app = express();
-const MONGO_URL = process.env.MONGO_URL;
+const MONGO_URL = config.MONGO_URL;
 
 app.use(cors({ origin: '*' }));
 app.use(express.json());
@@ -25,7 +24,7 @@ app.use(express.json());
 app.use('/api/auth', authRoute);
 app.use('/api/node', nodeRoute);
 
-if(process.env.NODE_ENV === 'test') {
+if(config.NODE_ENV === 'test') {
   module.exports = app;
 } else {
   mongoose.connect(`${MONGO_URL}`, {
