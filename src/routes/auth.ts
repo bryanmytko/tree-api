@@ -1,15 +1,15 @@
 import express, { Response } from 'express';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
-import pino from 'pino';
 
 const router = express.Router();
 
+import config from '../config';
 import User from '../models/user';
 import verify from '../middleware/verify';
 
 const ROUNDS = 10;
-const { TOKEN_SECRET } = process.env;
+const { TOKEN_SECRET } = config;
 
 const invalidLogin = (res: Response) => res.status(400).json({ error: 'Invalid login.' });
 

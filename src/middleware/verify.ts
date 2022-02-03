@@ -2,7 +2,9 @@ import jwt from 'jsonwebtoken';
 import { Request, Response, NextFunction } from 'express';
 import { Error } from 'mongoose';
 
-const { TOKEN_SECRET } = process.env;
+import config from '../config';
+
+const { TOKEN_SECRET } = config;
 
 const verify = (req: Request, res: Response, next: NextFunction) => {
   const authorization = req.headers.authorization;
