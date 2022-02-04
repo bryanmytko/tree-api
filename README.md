@@ -2,6 +2,10 @@
 
 Simple tree-like API
 
+# Environment
+
+
+
 # Auth
 
 Sign up or log in to obtain a JWT token and make requests as:
