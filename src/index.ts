@@ -10,9 +10,9 @@ import nodeRoute from './routes/node';
 
 const logger = pino({
   level: 'info',
-  transport: {
-   target: config.NODE_ENV !== 'production' ? 'pino-pretty' : ''
-  }
+  // transport: {
+  //  target: config.NODE_ENV !== 'production' ? 'pino-pretty' : ''
+  // }
 });
 
 const app = express();
