@@ -1,6 +1,5 @@
 import express from 'express';
 import mongoose, { ConnectOptions } from 'mongoose';
-import dotenv from 'dotenv';
 import cors from 'cors';
 import pino from 'pino';
 
@@ -9,10 +8,7 @@ import authRoute from './routes/auth';
 import nodeRoute from './routes/node';
 
 const logger = pino({
-  level: 'info',
-  // transport: {
-  //  target: config.NODE_ENV !== 'production' ? 'pino-pretty' : ''
-  // }
+  level: 'info'
 });
 
 const app = express();

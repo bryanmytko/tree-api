@@ -47,7 +47,6 @@
     "@typescript-eslint/parser": "^5.7.0",
     "eslint": "^8.5.0",
     "jest": "^27.4.7",
-    "pino-pretty": "^7.5.1",
     "supertest": "^6.2.2"
   }
 }
